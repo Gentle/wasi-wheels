@@ -43,7 +43,7 @@ jobs:
 
       - name: Build
         shell: bash
-        run: make -j4
+        run: make ./build/regex-wasi.tar.gz -j4
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
