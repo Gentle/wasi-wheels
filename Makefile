@@ -120,7 +120,7 @@ $(WASI_SDK):
 	(cd "$(@D)" && \
 		curl -LO "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-$(WASI_SDK_RELEASE)/wasi-sdk-$(WASI_SDK_VERSION)-$(HOST_ARCH)-$(HOST_PLATFORM).tar.gz" && \
 		tar xf "wasi-sdk-$(WASI_SDK_VERSION)-$(HOST_ARCH)-$(HOST_PLATFORM).tar.gz" && \
-		mv "wasi-sdk-$(WASI_SDK_VERSION)" wasi-sdk && \
+		mv "wasi-sdk-$(WASI_SDK_VERSION)-$(HOST_ARCH)-$(HOST_PLATFORM)" wasi-sdk && \
 		rm "wasi-sdk-$(WASI_SDK_VERSION)-$(HOST_ARCH)-$(HOST_PLATFORM).tar.gz")
 
 $(CPYTHON): $(WASI_SDK)
