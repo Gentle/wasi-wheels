@@ -143,7 +143,7 @@ $(CPYTHON): $(WASI_SDK)
 			fi) \
 		--prefix=$$(pwd)/install \
 		--enable-wasm-dynamic-linking \
-		--enable-ipv6 \
+		--disable-ipv6 \
 		--disable-test-modules && \
 		make install)
 
