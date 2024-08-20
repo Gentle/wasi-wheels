@@ -44,9 +44,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          make \
-            "${{ github.workspace }}/build/regex-wasi.tar.gz" \
-            -j4
+          make "${{ github.workspace }}/build/pydantic_core-wasi.tar.gz" -j4
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
