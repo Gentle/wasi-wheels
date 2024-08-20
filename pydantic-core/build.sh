@@ -35,6 +35,7 @@ export LDFLAGS="-shared"
 export _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata_${ARCH_TRIPLET}
 export CARGO_BUILD_TARGET=wasm32-wasi
 cd src
+patch -p1 < ../fix_build.patch
 rm -rf build
 mkdir build
 maturin build --release --target wasm32-wasi --out dist -i python3.12 -vvv
