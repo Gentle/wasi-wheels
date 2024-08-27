@@ -26,7 +26,6 @@ PYO3_CROSS_LIB_DIR := $(abspath cpython/builddir/wasi/build/lib.wasi-wasm32-3.12
 SPACY_OUTPUTS := \
 	$(BUILD_DIR)/cymem-wasi-2.0.8-py3-none-any.whl \
 	$(BUILD_DIR)/murmurhash-wasi-1.0.10-py3-none-any.whl \
-	$(BUILD_DIR)/numpy-wasi.tar.gz \
 	$(BUILD_DIR)/preshed-wasi-3.0.9-py3-none-any.whl \
 	$(BUILD_DIR)/srsly-wasi-2.4.8-py3-none-any.whl \
 	$(BUILD_DIR)/thinc-wasi-8.2.5-py3-none-any.whl \

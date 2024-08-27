@@ -39,7 +39,6 @@ export NPY_NO_SIGNAL=1
 export MACOSX_DEPLOYMENT_TARGET=3.11
 
 prebuild () {
-  echo "wrong"
   pip install -r requirements.txt
 }
 
