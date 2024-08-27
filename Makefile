@@ -23,8 +23,20 @@ WASI_SDK_RELEASE := shared-library-alpha-3
 HOST_PLATFORM := $(shell uname -s | sed -e 's/Darwin/macos/' -e 's/Linux/linux/')
 PYO3_CROSS_LIB_DIR := $(abspath cpython/builddir/wasi/build/lib.wasi-wasm32-3.12)
 
+SPACY_OUTPUTS := \
+	$(BUILD_DIR)/cymem-wasi-2.0.8-py3-none-any.whl \
+	$(BUILD_DIR)/murmurhash-wasi-1.0.10-py3-none-any.whl \
+	$(BUILD_DIR)/numpy-wasi.tar.gz \
+	$(BUILD_DIR)/preshed-wasi-3.0.9-py3-none-any.whl \
+	$(BUILD_DIR)/srsly-wasi-2.4.8-py3-none-any.whl \
+	$(BUILD_DIR)/thinc-wasi-8.2.5-py3-none-any.whl \
+	$(BUILD_DIR)/spacy-wasi-3.7.6-py3-none-any.whl
+
 .PHONY: all
 all: $(OUTPUTS)
+
+.PHONY: spacy
+spacy: $(SPACY_OUTPUTS)
 
 $(OUTPUTS): $(WASI_SDK) $(CPYTHON)
 
@@ -33,6 +45,15 @@ $(BUILD_DIR)/aiohttp-wasi.tar.gz: $(WASI_SDK) $(CPYTHON)
 	(cd aiohttp && CROSS_PREFIX=$(CPYTHON) WASI_SDK_PATH=$(WASI_SDK) bash build.sh)
 	cp -a aiohttp/src/build/*/aiohttp "$(@D)"
 	(cd "$(@D)" && tar czf aiohttp-wasi.tar.gz aiohttp)
+
+$(BUILD_DIR)/cymem-wasi-%-py3-none-any.whl: $(WASI_SDK) $(CPYTHON)
+	@mkdir -p "$(@D)"
+	CROSS_PREFIX=$(CPYTHON) \
+	WASI_SDK_PATH=$(WASI_SDK) \
+	VERSION=$* \
+	NAME=cymem \
+	ORG=explosion \
+		bash build_github.sh
 
 $(BUILD_DIR)/charset_normalizer-wasi.tar.gz: $(WASI_SDK) $(CPYTHON)
 	@mkdir -p "$(@D)"
@@ -52,6 +73,24 @@ $(BUILD_DIR)/multidict-wasi.tar.gz: $(WASI_SDK) $(CPYTHON)
 	cp -a multidict/src/build/lib.*/multidict "$(@D)"
 	(cd "$(@D)" && tar czf multidict-wasi.tar.gz multidict)
 
+$(BUILD_DIR)/murmurhash-wasi-%-py3-none-any.whl: $(WASI_SDK) $(CPYTHON)
+	@mkdir -p "$(@D)"
+	CROSS_PREFIX=$(CPYTHON) \
+	WASI_SDK_PATH=$(WASI_SDK) \
+	VERSION=$* \
+	ORG=explosion \
+	NAME=murmurhash \
+		bash build_github.sh
+
+$(BUILD_DIR)/numpy-wasi-%-py3-none-any.whl: $(WASI_SDK) $(CPYTHON)
+	@mkdir -p "$(@D)"
+	CROSS_PREFIX=$(CPYTHON) \
+	WASI_SDK_PATH=$(WASI_SDK) \
+	VERSION=$* \
+	ORG=numpy \
+	NAME=numpy \
+		bash build_github.sh
+
 $(BUILD_DIR)/numpy-wasi.tar.gz: $(WASI_SDK) $(CPYTHON)
 	@mkdir -p "$(@D)"
 	(cd numpy && CROSS_PREFIX=$(CPYTHON) WASI_SDK_PATH=$(WASI_SDK) bash build.sh)
@@ -63,6 +102,15 @@ $(BUILD_DIR)/pandas-wasi.tar.gz: $(WASI_SDK) $(CPYTHON)
 	(cd pandas && CROSS_PREFIX=$(CPYTHON) WASI_SDK_PATH=$(WASI_SDK) bash build.sh)
 	cp -a pandas/src/build/lib.*/pandas "$(@D)"
 	(cd "$(@D)" && tar czf pandas-wasi.tar.gz pandas)
+
+$(BUILD_DIR)/preshed-wasi-%-py3-none-any.whl: $(WASI_SDK) $(CPYTHON)
+	@mkdir -p "$(@D)"
+	CROSS_PREFIX=$(CPYTHON) \
+	WASI_SDK_PATH=$(WASI_SDK) \
+	VERSION=$* \
+	ORG=explosion \
+	NAME=preshed \
+		bash build_github.sh
 
 $(BUILD_DIR)/pydantic_core-wasi.tar.gz: $(WASI_SDK) $(CPYTHON)
 	@mkdir -p "$(@D)"
@@ -81,6 +129,33 @@ $(BUILD_DIR)/sqlalchemy-wasi.tar.gz: $(WASI_SDK) $(CPYTHON)
 	(cd sqlalchemy && CROSS_PREFIX=$(CPYTHON) WASI_SDK_PATH=$(WASI_SDK) bash build.sh)
 	cp -a sqlalchemy/src/build/lib.*/sqlalchemy "$(@D)"
 	(cd "$(@D)" && tar czf sqlalchemy-wasi.tar.gz sqlalchemy)
+
+$(BUILD_DIR)/spacy-wasi-%-py3-none-any.whl: $(WASI_SDK) $(CPYTHON)
+	@mkdir -p "$(@D)"
+	CROSS_PREFIX=$(CPYTHON) \
+	WASI_SDK_PATH=$(WASI_SDK) \
+	VERSION=$* \
+	ORG=explosion \
+	NAME=spacy \
+		bash build_github.sh
+
+$(BUILD_DIR)/srsly-wasi-%-py3-none-any.whl: $(WASI_SDK) $(CPYTHON)
+	@mkdir -p "$(@D)"
+	CROSS_PREFIX=$(CPYTHON) \
+	WASI_SDK_PATH=$(WASI_SDK) \
+	VERSION=$* \
+	ORG=explosion \
+	NAME=srsly \
+		bash build_github.sh
+
+$(BUILD_DIR)/thinc-wasi-%-py3-none-any.whl: $(WASI_SDK) $(CPYTHON)
+	@mkdir -p "$(@D)"
+	CROSS_PREFIX=$(CPYTHON) \
+	WASI_SDK_PATH=$(WASI_SDK) \
+	VERSION=$* \
+	ORG=explosion \
+	NAME=thinc \
+		bash build_github.sh
 
 $(BUILD_DIR)/tiktoken_ext-wasi.tar.gz: $(BUILD_DIR)/tiktoken-wasi.tar.gz
 	cp -a tiktoken/src/build/lib.*/tiktoken_ext "$(@D)"
@@ -152,3 +227,4 @@ clean:
 	find . -name 'venv' -maxdepth 2 | xargs -I {} rm -rf {}
 	find . -name 'build' -maxdepth 3 | xargs -I {} rm -rf {}
 	find . -name 'dist' -maxdepth 3 | xargs -I {} rm -rf {}
+	find . -name 'package' -maxdepth 3 | xargs -I {} rm -rf {}
