@@ -48,7 +48,8 @@ impl PythonVersion {
     /// Which version of WASI SDK should be used
     fn wasi_sdk_version(self) -> WasiSdk {
         match self {
-            Self::Py3_12 | Self::Py3_13 | Self::Py3_14 => WasiSdk::V24,
+            Self::Py3_12 | Self::Py3_13 => WasiSdk::V24,
+            Self::Py3_14 => WasiSdk::V27,
         }
     }
 
@@ -121,6 +122,10 @@ impl PythonVersion {
         const HOST_TRIPLE: &str = "wasm32-wasip2";
         let version = self.current_patch_version();
         let cpython = self.cpython_dir();
+        let build_tool = match self {
+            PythonVersion::Py3_13 => "./Tools/wasm/wasi.py",
+            _ => "./Tools/wasm/wasi",
+        };
 
         if !cpython.exists() {
             let bytes = get_bytes(format!(
@@ -144,7 +149,7 @@ impl PythonVersion {
                     .env("WASI_SDK_PATH", &wasi_sdk_path)
                     .current_dir(&cpython)
                     .args([
-                        "./Tools/wasm/wasi.py",
+                        build_tool,
                         "configure-build-python",
                         "--quiet",
                         "--",
@@ -155,7 +160,7 @@ impl PythonVersion {
                 run(Command::new("python3")
                     .env("WASI_SDK_PATH", &wasi_sdk_path)
                     .current_dir(&cpython)
-                    .args(["./Tools/wasm/wasi.py", "make-build-python", "--quiet"]))
+                    .args([build_tool, "make-build-python", "--quiet"]))
                 .await?;
             }
 
@@ -163,7 +168,7 @@ impl PythonVersion {
                 .env("WASI_SDK_PATH", &wasi_sdk_path)
                 .current_dir(&cpython)
                 .args([
-                    "./Tools/wasm/wasi.py",
+                    build_tool,
                     "configure-host",
                     &format!("--host-triple={HOST_TRIPLE}"),
                     // Current script doesn't work for some reason...
@@ -182,7 +187,7 @@ impl PythonVersion {
                 .env("WASI_SDK_PATH", wasi_sdk_path)
                 .current_dir(&cpython)
                 .args([
-                    "./Tools/wasm/wasi.py",
+                    build_tool,
                     "make-host",
                     "--quiet",
                     &format!("--host-triple={HOST_TRIPLE}"),
