@@ -45,7 +45,7 @@ enum Commands {
         #[command(flatten)]
         publish_flags: PublishFlags,
         /// Python versions to build with. Defaults to all supported versions
-        #[arg(long, value_enum, default_values_t=[PythonVersion::Py3_12, PythonVersion::Py3_13])]
+        #[arg(long, value_enum, default_values_t=[PythonVersion::Py3_12, PythonVersion::Py3_13, PythonVersion::Py3_14])]
         python_versions: Vec<PythonVersion>,
         /// Replace existing release if it exists
         #[arg(long)]
