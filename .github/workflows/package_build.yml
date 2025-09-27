@@ -23,6 +23,11 @@ on:
         type: boolean
         default: true
         description: "Build for Python 3.13"
+      python_3_14:
+        required: false
+        type: boolean
+        default: true
+        description: "Build for Python 3.14"
       publish:
         required: true
         default: false
@@ -69,10 +74,14 @@ jobs:
           key: python-cpython-wasi-3.13.2-wasi-sdk-24.0.0
       - uses: actions/cache@v4
         with:
+          path: cpython-3.14.0rc3-wasi-sdk-24.0
+          key: python-cpython-wasi-3.14.0rc3-wasi-sdk-24.0.0
+      - uses: actions/cache@v4
+        with:
           path: wasi-sdk-24.0
           key: wasi-sdk-24.0.0
 
       - run: cargo run -- install-build-tools
-      - run: cargo run -- build ${{ inputs.project }} ${{ inputs.version }} ${{ inputs.python_3_12 && '--python-versions py3-12' || '' }} ${{ inputs.python_3_13 && '--python-versions py3-13' || '' }} ${{ inputs.publish && format('--publish --repo {0} --run-id {1}', github.repository, github.run_id) || '' }} ${{ inputs.replace_existing_release && '--replace-existing-release' || '' }}
+      - run: cargo run -- build ${{ inputs.project }} ${{ inputs.version }} ${{ inputs.python_3_12 && '--python-versions py3-12' || '' }} ${{ inputs.python_3_13 && '--python-versions py3-13' || '' }} ${{ inputs.python_3_14 && '--python-versions py3-14' || '' }} ${{ inputs.publish && format('--publish --repo {0} --run-id {1}', github.repository, github.run_id) || '' }} ${{ inputs.replace_existing_release && '--replace-existing-release' || '' }}
         env:
           GH_TOKEN: ${{ github.token }}
