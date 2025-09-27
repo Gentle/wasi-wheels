@@ -21,6 +21,8 @@ pub enum PythonVersion {
     Py3_12,
     /// Python 3.13
     Py3_13,
+    /// Python 3.14
+    Py3_14,
 }
 
 impl std::fmt::Display for PythonVersion {
@@ -28,6 +30,7 @@ impl std::fmt::Display for PythonVersion {
         match self {
             PythonVersion::Py3_12 => write!(f, "3.12"),
             PythonVersion::Py3_13 => write!(f, "3.13"),
+            PythonVersion::Py3_14 => write!(f, "3.14"),
         }
     }
 }
@@ -38,13 +41,14 @@ impl PythonVersion {
         match self {
             Self::Py3_12 => "3.12.9",
             Self::Py3_13 => "3.13.2",
+            Self::Py3_14 => "3.14.0rc3",
         }
     }
 
     /// Which version of WASI SDK should be used
     fn wasi_sdk_version(self) -> WasiSdk {
         match self {
-            Self::Py3_12 | Self::Py3_13 => WasiSdk::V24,
+            Self::Py3_12 | Self::Py3_13 | Self::Py3_14 => WasiSdk::V24,
         }
     }
 
@@ -79,7 +83,7 @@ impl PythonVersion {
     fn wasi_dir(self) -> PathBuf {
         self.cpython_dir().join(match self {
             PythonVersion::Py3_12 => "builddir/wasi",
-            PythonVersion::Py3_13 => "cross-build/wasm32-wasip2",
+            PythonVersion::Py3_13 | PythonVersion::Py3_14 => "cross-build/wasm32-wasip2",
         })
     }
 
@@ -95,7 +99,9 @@ impl PythonVersion {
 
         match self {
             PythonVersion::Py3_12 => self.download_and_compile_legacy().await,
-            PythonVersion::Py3_13 => self.download_and_compile_with_wasi_script().await,
+            PythonVersion::Py3_13 | PythonVersion::Py3_14 => {
+                self.download_and_compile_with_wasi_script().await
+            }
         }
     }
 
