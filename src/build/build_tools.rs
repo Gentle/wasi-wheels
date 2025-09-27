@@ -315,18 +315,21 @@ async fn get_bytes(url: impl IntoUrl) -> anyhow::Result<bytes::Bytes> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum WasiSdk {
     V24,
+    V27,
 }
 
 impl WasiSdk {
     fn release(&self) -> &str {
         match self {
             Self::V24 => "wasi-sdk-24",
+            Self::V27 => "wasi-sdk-27",
         }
     }
 
     fn version(&self) -> &str {
         match self {
             Self::V24 => "24.0",
+            Self::V27 => "27.0",
         }
     }
 
