@@ -194,6 +194,17 @@ impl PythonVersion {
                 ]))
             .await?;
 
+            if let PythonVersion::Py3_14 = self {
+                // this file is no longer generated since 3.14
+                // and make install wants to copy it
+                std::fs::OpenOptions::new().append(true).create(true).open(
+                    cpython_wasi_dir
+                        .join("build")
+                        .join("lib.wasi-wasm32-3.14")
+                        .join("build-details.json"),
+                )?;
+            }
+
             run(Command::new("make")
                 .current_dir(&cpython_wasi_dir)
                 .arg("install"))
