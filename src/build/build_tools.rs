@@ -211,7 +211,7 @@ impl PythonVersion {
                     .join("build")
                     .join("lib.wasi-wasm32-3.14")
                     .join("build-details.json");
-                run(Command::new(cpython_native_dir.join("python.exe"))
+                run(Command::new(cpython_native_dir.join(PYTHON_EXECUTABLE))
                     .current_dir(&cpython)
                     .env("_PYTHON_PROJECT_BASE", &cpython_wasi_dir)
                     .env("_PYTHON_HOST_PLATFORM", "wasi-wasm32")
