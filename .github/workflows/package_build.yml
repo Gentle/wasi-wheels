@@ -64,7 +64,7 @@ jobs:
           python-version: |
             3.12.9
             3.13.2
-            3.14.0-rc.3
+            3.14.0
       - uses: actions/cache@v5
         with:
           path: cpython-3.12.9-wasi-sdk-24.0
@@ -75,8 +75,8 @@ jobs:
           key: python-cpython-wasi-3.13.2-wasi-sdk-24.0.0
       - uses: actions/cache@v5
         with:
-          path: cpython-3.14.0rc3-wasi-sdk-24.0
-          key: python-cpython-wasi-3.14.0rc3-wasi-sdk-24.0.0
+          path: cpython-3.14.0-wasi-sdk-30.0
+          key: python-cpython-wasi-3.14.0-wasi-sdk-30.0.0
       - uses: actions/cache@v4
         with:
           path: wasi-sdk-24.0
