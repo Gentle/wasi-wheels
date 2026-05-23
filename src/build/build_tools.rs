@@ -195,14 +195,39 @@ impl PythonVersion {
             .await?;
 
             if let PythonVersion::Py3_14 = self {
-                // this file is no longer generated since 3.14
-                // and make install wants to copy it
-                std::fs::OpenOptions::new().append(true).create(true).open(
-                    cpython_wasi_dir
-                        .join("build")
-                        .join("lib.wasi-wasm32-3.14")
-                        .join("build-details.json"),
-                )?;
+                // CPython 3.14's `make install` copies a stdlib-relative
+                // `build-details.json` (PEP 739) but the WASI cross-build
+                // doesn't generate one — the script that produces it is
+                // designed to be run against the *target* python's
+                // sysconfig, which in our case is `cross-build/build/python.exe`
+                // (the host-native python) with the wasi sysconfig env
+                // vars set. We generate it here so `make install` has
+                // something to copy, then patch in `abi.extension_suffix`
+                // — a field maturin 1.13 requires that CPython 3.14.0's
+                // generate-build-details.py doesn't emit (likely added in
+                // a later PEP 739 revision; can drop the patch when the
+                // upstream script catches up).
+                let build_details = cpython_wasi_dir
+                    .join("build")
+                    .join("lib.wasi-wasm32-3.14")
+                    .join("build-details.json");
+                run(Command::new(cpython_native_dir.join("python.exe"))
+                    .current_dir(&cpython)
+                    .env("_PYTHON_PROJECT_BASE", &cpython_wasi_dir)
+                    .env("_PYTHON_HOST_PLATFORM", "wasi-wasm32")
+                    .env(
+                        "_PYTHON_SYSCONFIGDATA_NAME",
+                        "_sysconfigdata__wasi_wasm32-wasi",
+                    )
+                    .env(
+                        "_PYTHON_SYSCONFIGDATA_PATH",
+                        cpython_wasi_dir.join("build/lib.wasi-wasm32-3.14"),
+                    )
+                    .env("PYTHONPATH", "Lib")
+                    .arg("Tools/build/generate-build-details.py")
+                    .arg(&build_details))
+                .await?;
+                inject_extension_suffix(&build_details, ".cpython-314-wasm32-wasi.so")?;
             }
 
             run(Command::new("make")
@@ -313,6 +338,29 @@ impl PythonVersion {
         }
         Ok(path)
     }
+}
+
+/// Patch a `build-details.json` to add `abi.extension_suffix`.
+///
+/// CPython 3.14.0's `Tools/build/generate-build-details.py` doesn't
+/// emit this field, but maturin 1.13's PEP 739 parser requires it.
+/// We read, mutate, and rewrite the JSON in place.
+fn inject_extension_suffix(
+    build_details: &Path,
+    extension_suffix: &str,
+) -> anyhow::Result<()> {
+    let contents = std::fs::read_to_string(build_details)?;
+    let mut value: serde_json::Value = serde_json::from_str(&contents)?;
+    let abi = value
+        .as_object_mut()
+        .and_then(|m| m.entry("abi").or_insert_with(|| serde_json::json!({})).as_object_mut())
+        .ok_or_else(|| anyhow::anyhow!("build-details.json `abi` is not an object"))?;
+    abi.insert(
+        "extension_suffix".to_string(),
+        serde_json::Value::String(extension_suffix.to_string()),
+    );
+    std::fs::write(build_details, serde_json::to_string_pretty(&value)?)?;
+    Ok(())
 }
 
 async fn get_bytes(url: impl IntoUrl) -> anyhow::Result<bytes::Bytes> {
