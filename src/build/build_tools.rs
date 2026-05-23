@@ -426,11 +426,24 @@ impl WasiSdk {
             .await??;
             fs::rename(download_dir, &dir).await?;
 
-            // Hack for cpython to use wasip2 files. Uses wasip2 for wasi
+            // Hack for cpython to use wasip2 files. Uses wasip2 for wasi.
+            //
+            // wasi-sdk-30 only ships per-arch dirs under `include/` and
+            // `lib/` — `share/wasi-sysroot/share/` has no `wasm32-wasi`
+            // subdir (it only holds `libc++/`). Older sdks (24-ish)
+            // had one. Tolerate either layout: skip dirs that don't
+            // have a wasm32-wasi to rename. Otherwise the loop dies
+            // half-way and leaves the sdk in a state where the
+            // `if !dir.exists()` short-circuit will skip the rest on
+            // every subsequent run (silently wrong).
             let sysroot_path = dir.join("share").join("wasi-sysroot");
             for dir in ["include", "lib", "share"] {
                 let dir = sysroot_path.join(dir);
-                fs::rename(dir.join("wasm32-wasi"), dir.join("wasm32-wasi-bk")).await?;
+                let src = dir.join("wasm32-wasi");
+                if !src.exists() {
+                    continue;
+                }
+                fs::rename(&src, dir.join("wasm32-wasi-bk")).await?;
                 run(Command::new("cp")
                     .args(["-r", "wasm32-wasip2", "wasm32-wasi"])
                     .current_dir(dir))

@@ -77,10 +77,14 @@ jobs:
         with:
           path: cpython-3.14.0-wasi-sdk-30.0
           key: python-cpython-wasi-3.14.0-wasi-sdk-30.0.0
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: wasi-sdk-24.0
           key: wasi-sdk-24.0.0
+      - uses: actions/cache@v5
+        with:
+          path: wasi-sdk-30.0
+          key: wasi-sdk-30.0.0
 
       - run: cargo run -- install-build-tools
       - run: cargo run -- build ${{ inputs.project }} ${{ inputs.version }} ${{ inputs.python_3_12 && '--python-versions py3-12' || '' }} ${{ inputs.python_3_13 && '--python-versions py3-13' || '' }} ${{ inputs.python_3_14 && '--python-versions py3-14' || '' }} ${{ inputs.publish && format('--publish --repo {0} --run-id {1}', github.repository, github.run_id) || '' }} ${{ inputs.replace_existing_release && '--replace-existing-release' || '' }}
